@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects · Sai Yashwant Tavva · Risk Analyst</title>
+<meta name="description" content="Risk and BI projects by Sai Yashwant Tavva: bookmaker odds testing, SQL case study, Tableau and Power BI dashboards.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1b2f55">
+<link rel="icon" type="image/jpeg" href="../assets/profile-64.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --frame: #1b2f55;
+  --board: #25416f;
+  --board-line: #3a5891;
+  --sheet: #e9eef5;
+  --sheet-line: #d3dbe6;
+  --sheet-text: #1a2436;
+  --sheet-muted: #5d6a80;
+  --pill: #1e4585;
+  --pill-hover: #2a59a8;
+  --accent: #19c39b;
+  --accent-ink: #03231b;
+  --gold: #ffc23d;
+  --up: #1f9d55; --up-bg: #d8f3e3;
+  --live: #e5484d;
+  --text: #f2f6fc;
+  --muted: #c7d4ea;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--frame); color: var(--text); font: 14px/1.45 Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+.cond { font-family: "Barlow Condensed", Barlow, sans-serif; text-transform: uppercase; letter-spacing: .02em; }
+
+/* top bar (same as the rest of the site) */
+.t-bar { position: sticky; top: 0; z-index: 30; background: linear-gradient(180deg, #22407a, #1a3361); border-bottom: 1px solid #34548f; }
+.t-bar .in { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 16px; max-width: 1240px; margin: 0 auto; }
+.t-bar .home img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; display: block; border: 2px solid var(--accent); }
+.t-bar .who { line-height: 1.15; }
+.t-bar .who b { display: block; font-size: 15px; white-space: nowrap; }
+.t-bar .who span { font-size: 12px; color: var(--muted); }
+.t-bar .navs { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.t-bar .navs a { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 15px; text-transform: uppercase; color: #d6e1f0; border: 1px solid #4d6aa0; padding: 8px 12px; border-radius: 8px; }
+.t-bar .navs a:hover { border-color: var(--accent); }
+.t-bar .navs a.on { border-color: var(--accent); color: var(--accent); }
+.t-bar .navs a svg { width: 18px; height: 18px; }
+.t-bar .navs a.cta { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+main { max-width: 1240px; margin: 0 auto; padding: 16px 16px 40px; }
+
+/* page header panel */
+.head { background: var(--board); border: 1px solid var(--board-line); border-radius: 12px; padding: 18px; }
+.head .meta { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); }
+.badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: .06em; text-transform: uppercase; }
+.badge.live { background: var(--live); color: #fff; }
+.head h1 { margin: 10px 0 6px; font-size: clamp(28px, 4vw, 40px); font-weight: 800; line-height: 1.05; }
+.head p { margin: 0; color: #dbe4f3; max-width: 700px; font-size: 15px; }
+
+/* tool filter tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.tab { background: #2c4a80; border: 1px solid #45679f; color: var(--text); border-radius: 8px; padding: 7px 14px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.tab:hover { border-color: var(--accent); }
+.tab.on { background: #e9eef5; color: #11203a; border-color: #e9eef5; }
+.tab .n { display: inline-block; margin-left: 6px; font-size: 11px; background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 0 7px; }
+
+/* project "events" */
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; margin-top: 12px; }
+.ev { background: var(--board); border: 1px solid var(--board-line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+.ev-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; gap: 10px; }
+.ev-h .when { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.live-tag { background: var(--live); color: #fff; font-weight: 700; font-size: 10px; padding: 1px 5px; border-radius: 3px; letter-spacing: .04em; }
+.grade { background: var(--gold); color: #2b1d00; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.ev-sheet { background: var(--sheet); color: var(--sheet-text); margin: 0 12px 12px; border-radius: 10px; padding: 14px; flex: 1; display: flex; flex-direction: column; }
+.ev-sheet h2 { margin: 0 0 6px; font-size: 19px; line-height: 1.2; }
+.ev-sheet p { margin: 0 0 12px; color: #3d4a60; font-size: 14px; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tools span { font-size: 11px; font-weight: 700; color: #34507f; background: #d7e2f2; border-radius: 4px; padding: 2px 7px; }
+.prices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: auto; }
+.price { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--pill); color: #fff; border-radius: 999px; padding: 9px 14px; min-width: 0; }
+.price .l { font-size: 11px; opacity: .85; white-space: nowrap; }
+.price .v { font-weight: 700; font-size: 13px; white-space: nowrap; }
+.price.up { background: var(--up-bg); color: var(--up); }
+a.price.open { background: var(--accent); color: var(--accent-ink); }
+a.price.open:hover { filter: brightness(1.06); }
+.price.none { background: #c9d4e5; color: #4a5a74; }
+.empty { display: none; margin-top: 12px; color: var(--muted); }
+
+footer { max-width: 1240px; margin: 0 auto; padding: 10px 16px 28px; color: #b4c3dc; font-size: 12px; display: flex; justify-content: space-between; gap: 12px; }
+footer a:hover { color: #fff; }
+
+@media (max-width: 900px) { .t-bar .who span { display: none; } }
+@media (max-width: 480px) {
+  .t-bar .navs { gap: 6px; } .t-bar .navs a { padding: 8px 9px; font-size: 14px; } .t-bar .who b { font-size: 14px; }
+  .t-bar .navs .hide-xs { display: none; }
+  .list { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="t-bar">
+  <div class="in">
+    <a class="home" href="../" aria-label="Home"><img src="../assets/profile.jpg" alt="" width="44" height="44"></a>
+    <a class="who" href="../"><b>Sai Yashwant Tavva</b><span>Risk Analyst · Projects</span></a>
+    <nav class="navs" aria-label="Site">
+      <a class="on" href="./" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="hide-xs">Projects</span></a>
+      <a href="../" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
+      <a class="cta" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">Email me</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="head">
+    <div class="meta"><span class="badge live">Live</span><span class="cond">All projects · 5 events</span></div>
+    <h1 class="cond">Projects</h1>
+    <p>Statistical testing on bookmaker odds, a SQL case study on 1.96 million records, and interactive Tableau and Power BI dashboards. Projects marked Live open an interactive version.</p>
+    <div class="tabs" id="tabs" role="group" aria-label="Filter by tool"></div>
+  </section>
+
+  <div class="list" id="list">
+    <article class="ev" data-tools="SQL|Python|Data quality">
+      <div class="ev-h"><span class="when"><span class="live-tag">LIVE</span>Oct 2026 · Case study</span><span class="grade">Featured</span></div>
+      <div class="ev-sheet">
+        <h2>Service Operations MI dashboard</h2>
+        <p>1.96 million real NYC 311 requests modelled in SQL as a star schema. The headline 48-hour SLA read 69.6%; with the fastest team taken out, it was 38.8%. 28,503 suspect records flagged and kept auditable.</p>
+        <div class="tools"><span>SQL</span><span>Python</span><span>Data quality</span></div>
+        <div class="prices">
+          <span class="price up"><span class="l">Records</span><span class="v">1.96M ▲</span></span>
+          <a class="price open" href="service-ops/"><span class="l">Dashboard</span><span class="v">Open ›</span></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="ev" data-tools="Python|Statistics|Betting data">
+      <div class="ev-h"><span class="when">2026 · MSc capstone</span><span class="grade">Graded Excellent</span></div>
+      <div class="ev-sheet">
+        <h2>Football match data vs bookmaker odds</h2>
+        <p>Tested whether match performance data adds predictive value beyond bookmaker odds, using McNemar's test, a chronological split and 5-fold cross-validation. It did not (p = 0.579, 1.0 and 0.46). Fixed a data-loss bug from mixed date formats and removed data leakage from an early model.</p>
+        <div class="tools"><span>Python</span><span>Statistics</span><span>Betting data</span></div>
+        <div class="prices">
+          <span class="price up"><span class="l">McNemar</span><span class="v">p 0.579</span></span>
+          <span class="price none"><span class="l">Public link</span><span class="v">Not yet</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="ev" data-tools="Tableau">
+      <div class="ev-h"><span class="when"><span class="live-tag">LIVE</span>May 2026 · Dashboard</span></div>
+      <div class="ev-sheet">
+        <h2>UK rental property dashboard</h2>
+        <p>Rent, revenue and occupancy across London, Manchester, Birmingham and Bristol, with property-type mix and rent against bedrooms.</p>
+        <div class="tools"><span>Tableau</span></div>
+        <div class="prices">
+          <span class="price"><span class="l">Cities</span><span class="v">4</span></span>
+          <a class="price open" href="uk-rental/"><span class="l">Dashboard</span><span class="v">Open ›</span></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="ev" data-tools="Tableau|Forecasting">
+      <div class="ev-h"><span class="when"><span class="live-tag">LIVE</span>May 2026 · Dashboard</span></div>
+      <div class="ev-sheet">
+        <h2>Solar array output vs forecast</h2>
+        <p>Power generation by month and by array site, with actual output tracked against the forecast hour by hour.</p>
+        <div class="tools"><span>Tableau</span><span>Forecasting</span></div>
+        <div class="prices">
+          <span class="price"><span class="l">Granularity</span><span class="v">Hourly</span></span>
+          <a class="price open" href="solar/"><span class="l">Dashboard</span><span class="v">Open ›</span></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="ev" data-tools="Power BI|Tableau">
+      <div class="ev-h"><span class="when">2026 · MSc data visualisation</span></div>
+      <div class="ev-sheet">
+        <h2>Retail case study: Power BI vs Tableau</h2>
+        <p>Power BI case study on a 15,000-record retail dataset, compared with Tableau and checked against WCAG accessibility guidelines.</p>
+        <div class="tools"><span>Power BI</span><span>Tableau</span></div>
+        <div class="prices">
+          <span class="price"><span class="l">Records</span><span class="v">15k</span></span>
+          <span class="price none"><span class="l">Public link</span><span class="v">Not yet</span></span>
+        </div>
+      </div>
+    </article>
+  </div>
+  <p class="empty" id="empty">No projects use that tool yet.</p>
+</main>
+
+<footer><span>© 2026 Sai Yashwant Tavva · Risk Analyst portfolio</span><a href="../">← Home</a></footer>
+
+<script>
+(function () {
+  // Tool tabs are built from the projects on the page, so adding a project adds its tools
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.ev'));
+  var counts = {};
+  cards.forEach(function (c) { c.dataset.tools.split('|').forEach(function (t) { counts[t] = (counts[t] || 0) + 1; }); });
+  var tabs = document.getElementById('tabs'), empty = document.getElementById('empty');
+  ['All'].concat(Object.keys(counts)).forEach(function (t) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'tab' + (t === 'All' ? ' on' : '');
+    b.innerHTML = t + '<span class="n">' + (t === 'All' ? cards.length : counts[t]) + '</span>';
+    b.setAttribute('aria-pressed', t === 'All');
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(tabs.children, function (x) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
+      b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
+      var shown = 0;
+      cards.forEach(function (c) { var ok = t === 'All' || c.dataset.tools.split('|').indexOf(t) > -1; c.style.display = ok ? '' : 'none'; if (ok) shown++; });
+      empty.style.display = shown ? 'none' : 'block';
+    });
+    tabs.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
