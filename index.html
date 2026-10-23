@@ -236,17 +236,35 @@ body { background: #eef2f7; color: #16233a; }
 .taskbar { color: #5b6b85; }
 
 @media (max-width: 480px) { .bar .who { display: none; } }
+
+/* ===== Shared site top bar (identical on every page) ===== */
+.sbar { position: sticky; top: 0; z-index: 30; background: linear-gradient(180deg, #22407a, #1a3361); border-bottom: 1px solid #34548f; font-family: Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.sbar .in { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 16px; max-width: 1440px; margin: 0 auto; }
+.sbar .me { display: block; width: 44px; height: 44px; flex: none; }
+.sbar .me img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; display: block; border: 2px solid #19c39b; }
+.sbar .who { line-height: 1.15; color: #fff; text-decoration: none; }
+.sbar .who b { display: block; font-size: 15px; font-weight: 700; white-space: nowrap; }
+.sbar .who span { display: block; font-size: 12px; color: #c7d4ea; }
+.sbar .navs { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.sbar .navs a { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: "Barlow Condensed", Barlow, sans-serif; font-weight: 700; font-size: 15px; line-height: 1; text-transform: uppercase; color: #e6eefb; border: 1px solid #4d6aa0; padding: 9px 12px; border-radius: 8px; text-decoration: none; background: transparent; }
+.sbar .navs a:hover { border-color: #19c39b; }
+.sbar .navs a.on { border-color: #19c39b; color: #19c39b; }
+.sbar .navs a svg { width: 18px; height: 18px; }
+.sbar .navs a.cta { background: #19c39b; color: #03231b; border-color: #19c39b; }
+.sbar .navs a.cta:hover { filter: brightness(1.06); }
+@media (max-width: 900px) { .sbar .who span { display: none; } }
+@media (max-width: 480px) { .sbar .navs { gap: 6px; } .sbar .navs a { padding: 9px 9px; font-size: 14px; } .sbar .who { display: none; } .sbar .navs .hide-xs { display: none; } }
 </style>
 </head>
 <body>
 
-<header class="bar">
+<header class="sbar">
   <div class="in">
-    <a class="home" href="#top" aria-label="Sai Yashwant Tavva, back to top"><img src="assets/profile.jpg" alt="" width="44" height="44"></a>
-    <div class="who"><b>Sai Yashwant Tavva</b><span>Risk Analyst · Portfolio</span></div>
-    <nav class="navs" aria-label="Sections">
-      <a class="homebtn" href="projects/" aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="hide-xs">Projects</span></a>
-      <a class="homebtn" href="./" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
+    <a class="me" href="./" aria-label="Home"><img src="assets/profile.jpg" alt="" width="44" height="44"></a>
+    <a class="who" href="./"><b>Sai Yashwant Tavva</b><span>Risk Analyst</span></a>
+    <nav class="navs" aria-label="Site">
+      <a href="projects/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="hide-xs">Projects</span></a>
+      <a class="on" aria-current="page" href="./"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
       <a class="cta" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">Email me</a>
     </nav>
   </div>
