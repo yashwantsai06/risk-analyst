@@ -258,6 +258,26 @@ body { background: #eef2f7; color: #16233a; }
 .ad .card { color: #fff; } .ad .card b { color: #fff; } .ad .card span { color: #dbe8fb; opacity: 1; }
 
 .chip b { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.2; }
+
+/* Match header ("A v B") sits under the panel title, above the tabs */
+.event.match { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; margin: 0; padding: 14px 16px; background: #f4f7fb; border-bottom: 1px solid #e1e7f0; }
+.event.match .side { display: flex; align-items: center; gap: 10px; font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 20px; color: #16233a; min-width: 0; text-align: left; }
+.event.match .side span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event.match .side.left { justify-content: flex-end; }
+.event.match .side.right { justify-content: flex-start; }
+.event.match .side img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; border: 2px solid #19c39b; flex: none; }
+.event.match .side svg { width: 28px; height: 28px; color: #1d3f78; flex: none; }
+.event.match .mid { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; line-height: 1.2; }
+.event.match .mid .vs { background: #1a3361; color: #fff; font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 13px; letter-spacing: .06em; padding: 2px 10px; border-radius: 999px; }
+.event.match .mid b { font-size: 13px; color: #16233a; }
+.event.match .mid small { font-size: 11px; color: #5b6b85; white-space: nowrap; }
+@media (max-width: 900px) {
+  .event.match { grid-template-columns: 1fr; gap: 8px; }
+  .event.match .side.left, .event.match .side.right { justify-content: center; }
+  .event.match .mid { order: 0; }
+  .event.match .side.right { order: 1; }
+  .event.match .side:last-child::before { content: none; }
+}
 </style>
 </head>
 <body>
@@ -296,17 +316,18 @@ body { background: #eef2f7; color: #16233a; }
         <a class="pill-link" href="projects/">Live projects ›</a>
       </div>
 
+      <div class="event match">
+        <span class="side left"><img src="assets/profile.jpg" alt="" width="32" height="32"><span>Sai Yashwant Tavva</span></span>
+        <span class="mid"><span class="vs">VS</span><b>Today</b><small>London · open to Risk Analyst roles</small></span>
+        <span class="side right"><span>Your risk team</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></span>
+      </div>
+
       <div class="chips" role="tablist" aria-label="Featured evidence">
         <button class="chip on" role="tab" aria-selected="true" data-detail="d1"><span class="ic">01</span><span><b>Capstone v Odds</b><span>Graded Excellent</span></span></button>
         <button class="chip" role="tab" aria-selected="false" data-detail="d2"><span class="ic">02</span><span><b>Headline v Reality</b><span>69.6% → 38.8%</span></span></button>
         <button class="chip" role="tab" aria-selected="false" data-detail="d3"><span class="ic">03</span><span><b>Developer v SQL</b><span>Latency −30%</span></span></button>
       </div>
 
-      <div class="event">
-        <span class="side">Sai Yashwant Tavva</span>
-        <span class="mid"><b>Today</b>London · open to Risk Analyst roles</span>
-        <span class="side">Your risk team</span>
-      </div>
 
       <div class="detail" id="detail" aria-live="polite"></div>
 
