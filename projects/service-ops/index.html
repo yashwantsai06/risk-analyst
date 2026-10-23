@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Operations MI · Sai Yashwant Tavva</title>
+<meta name="description" content="Interactive service-operations dashboard and case study built on 1.9M real NYC 311 service requests: volumes, resolution SLAs, channel mix, demand patterns and data quality.">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/jpeg" href="../../assets/profile-64.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f9f9f7;
+  --surface: #fcfcfb;
+  --text: #0b0b0b;
+  --muted: #52514e;
+  --faint: #898781;
+  --line: #e1e0d9;
+  --axis: #c3c2b7;
+  --accent: #2a78d6;
+  --chip: #f2f2ee;
+  --ring: rgba(11,11,11,0.10);
+  --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5;
+  --seq-5: #256abf; --seq-6: #184f95; --seq-7: #0d366b;
+  --good: #006300;
+  --bad: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: #0d0d0d; --surface: #1a1a19; --text: #ffffff; --muted: #c3c2b7; --faint: #898781;
+    --line: #2c2c2a; --axis: #383835; --accent: #3987e5; --chip: #232321; --ring: rgba(255,255,255,0.10);
+    --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #256abf;
+    --seq-5: #3987e5; --seq-6: #6da7ec; --seq-7: #b7d3f6;
+    --good: #0ca30c; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #08111f; --surface: #0f1d33; --text: #f2f6fc; --muted: #9fb0c8; --faint: #7a8ba6;
+  --line: #1c3050; --axis: #2a4268; --accent: #19c39b; --chip: #14274a; --ring: rgba(255,255,255,0.10);
+  --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #256abf;
+  --seq-5: #3987e5; --seq-6: #6da7ec; --seq-7: #b7d3f6;
+  --good: #0ca30c; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+.top { display: flex; justify-content: space-between; align-items: center; height: 56px; border-bottom: 1px solid var(--line); }
+.top a { text-decoration: none; font-weight: 600; font-size: 14px; }
+.icon-btn { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; font-size: 16px; }
+
+header { padding: 48px 0 28px; }
+.eyebrow { font: 500 12px/1 "JetBrains Mono", monospace; color: var(--accent); letter-spacing: .03em; text-transform: uppercase; }
+h1 { font-size: clamp(28px, 4.5vw, 42px); line-height: 1.12; letter-spacing: -0.025em; margin: 12px 0 14px; }
+.lead { color: var(--muted); font-size: 17px; max-width: 760px; margin: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.tag { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); color: var(--muted); }
+
+.filters { position: sticky; top: 60px; z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); padding: 12px 0; }
+.filters .wrap { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 500; }
+.filters select { font: inherit; font-size: 14px; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-width: 160px; }
+.filters button { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.filters .note { font-size: 12px; color: var(--faint); margin-left: auto; }
+
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
+@media (min-width: 1000px) { .kpis { grid-template-columns: repeat(6, 1fr); } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+.kpi .value { white-space: nowrap; }
+.kpi .value.long { font-size: 22px; line-height: 34px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.kpi .label { font-size: 12px; color: var(--muted); font-weight: 500; }
+.kpi .value { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-top: 6px; }
+.kpi .sub { font-size: 12px; color: var(--faint); margin-top: 2px; }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 14px; margin-bottom: 16px; min-width: 0; }
+.panel h2 { font-size: 15px; margin: 0; letter-spacing: -0.01em; }
+.panel .desc { font-size: 13px; color: var(--muted); margin: 2px 0 12px; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.axis text, .lbl { fill: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+.val { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.grid line { stroke: var(--line); stroke-width: 1; }
+.base { stroke: var(--axis); stroke-width: 1; }
+
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--ring); box-shadow: 0 8px 24px -10px rgba(0,0,0,.35); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; white-space: nowrap; opacity: 0; transition: opacity .12s; z-index: 4; }
+.tip b { font-weight: 600; }
+.tip .k { color: var(--muted); }
+
+table.rows { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.rows th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+table.rows td { padding: 7px 8px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; vertical-align: middle; }
+table.rows tr:last-child td { border-bottom: 0; }
+table.rows td.num, table.rows th.num { text-align: right; }
+.bar { height: 10px; background: var(--accent); border-radius: 0 4px 4px 0; min-width: 2px; }
+.barcell { width: 38%; }
+
+.legend { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--faint); margin-top: 8px; }
+.legend .ramp { display: flex; }
+.legend .ramp span { width: 22px; height: 10px; }
+
+article { max-width: 760px; }
+article h2 { font-size: 22px; letter-spacing: -0.015em; margin: 44px 0 10px; }
+article p, article li { color: var(--muted); font-size: 16px; }
+article strong { color: var(--text); }
+article code { font: 13px "JetBrains Mono", monospace; background: var(--chip); padding: 1px 5px; border-radius: 4px; }
+.finding { border-left: 3px solid var(--accent); padding: 2px 0 2px 16px; margin: 18px 0; }
+.finding h3 { font-size: 16px; margin: 0 0 4px; }
+.finding p { margin: 0; }
+footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--faint); }
+
+@media (max-width: 640px) {
+  .grid2 { grid-template-columns: 1fr; }
+  .filters select { min-width: 0; width: 100%; }
+  .filters label { flex: 1 1 140px; }
+  .filters .note { margin-left: 0; }
+}
+
+/* ---------- terminal top bar (matches the Risk Analyst home page) ---------- */
+.t-bar { position: sticky; top: 0; z-index: 30; background: linear-gradient(180deg, #11223b, #0d1a2e); border-bottom: 1px solid #1e3352; font-family: Barlow, system-ui, sans-serif; }
+.t-bar .in { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 16px; max-width: 1440px; margin: 0 auto; }
+.t-bar .home img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; display: block; border: 2px solid #19c39b; }
+.t-bar .who { line-height: 1.15; color: #f2f6fc; text-decoration: none; }
+.t-bar .who b { display: block; font-size: 15px; white-space: nowrap; }
+.t-bar .who span { font-size: 12px; color: #9fb0c8; }
+.t-bar .navs { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.t-bar .navs a { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 15px; text-transform: uppercase; color: #d6e1f0; border: 1px solid #2a4268; padding: 8px 12px; border-radius: 8px; text-decoration: none; }
+.t-bar .navs a:hover { border-color: #19c39b; }
+.t-bar .navs a svg { width: 18px; height: 18px; }
+.t-bar .navs a.cta { background: #19c39b; color: #03231b; border-color: #19c39b; }
+@media (max-width: 900px) { .t-bar .who span { display: none; } }
+@media (max-width: 480px) { .t-bar .navs { gap: 6px; } .t-bar .navs a { padding: 8px 9px; font-size: 14px; } .t-bar .who b { font-size: 14px; } .t-bar .navs .hide-xs { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="t-bar">
+  <div class="in">
+    <a class="home" href="../../" aria-label="Home"><img src="../../assets/profile.jpg" alt="" width="44" height="44"></a>
+    <a class="who" href="../../"><b>Sai Yashwant Tavva</b><span>Risk Analyst · Projects</span></a>
+    <nav class="navs" aria-label="Site">
+      <a href="../../#coupon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="hide-xs">Projects</span></a>
+      <a href="../../" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
+      <a class="cta" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">Email me</a>
+    </nav>
+  </div>
+</header>
+
+<header class="wrap">
+  <div class="eyebrow">Case study · Service operations MI</div>
+  <h1>Where 1.9 million service requests get stuck</h1>
+  <p class="lead">An operational reporting dashboard for a public contact centre: demand, channel mix, resolution against a 48-hour SLA, and the data-quality issues that quietly distort those numbers. Built on six months of real NYC 311 service requests.</p>
+  <div class="tags">
+    <span class="tag">SQL (SQLite)</span><span class="tag">Star schema</span><span class="tag">Python ETL</span><span class="tag">KPI design</span><span class="tag">JavaScript / SVG dashboard</span><span class="tag">Data quality</span>
+  </div>
+</header>
+
+<div class="filters" role="region" aria-label="Filters">
+  <div class="wrap">
+    <label>Agency <select id="f-agency"></select></label>
+    <label>Channel <select id="f-channel"></select></label>
+    <label>Borough <select id="f-borough"></select></label>
+    <button id="f-reset" type="button">Reset</button>
+    <span class="note" id="f-note"></span>
+  </div>
+</div>
+
+<main class="wrap">
+  <section class="kpis" id="kpis" aria-live="polite"></section>
+
+  <div class="panel">
+    <h2>Weekly request volume</h2>
+    <p class="desc">New requests per week (Monday start). Partial weeks at the start and end of the period are left out.</p>
+    <div class="chart" id="c-volume"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Resolved within 48 hours, by week</h2>
+      <p class="desc">Share of measurable closures that met the 48-hour SLA.</p>
+      <div class="chart" id="c-sla"></div>
+    </div>
+    <div class="panel">
+      <h2>How long resolution takes</h2>
+      <p class="desc">Closed requests by time to close. Auto-closures at creation are excluded.</p>
+      <div class="chart" id="c-bands"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Channel mix and performance</h2>
+      <p class="desc">Where requests come from, and how quickly each channel gets resolved.</p>
+      <div id="t-channel"></div>
+    </div>
+    <div class="panel">
+      <h2>Agency scorecard</h2>
+      <p class="desc">Volume and SLA performance by agency (8 largest, rest in Other).</p>
+      <div id="t-agency"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>When demand arrives</h2>
+    <p class="desc">Requests by day of week and hour created (local time). Darker means more requests. Follows the agency and channel filters.</p>
+    <div class="chart" id="c-heat"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Top complaint types</h2>
+    <p class="desc">The 10 largest complaint types for the current agency and channel filter, with the share that took more than 7 days.</p>
+    <div id="t-complaints"></div>
+  </div>
+
+  <article id="case-study">
+    <h2>The brief</h2>
+    <p>A contact-centre operations lead wants one page that answers four questions every Monday: <strong>how much demand came in, are we meeting the 48-hour SLA, which channels and teams are falling behind, and when should we staff up</strong>. They also want to know how far they can trust the numbers.</p>
+
+    <h2>Data and model</h2>
+    <p id="cs-data">Loading…</p>
+    <p>The raw extract is loaded into SQLite and modelled as a <strong>star schema</strong>: one fact table with a row per request, and dimension tables for agency, channel, borough and complaint type. Long tails are rolled up (the 8 largest agencies and 25 largest complaint types keep their names, everything else becomes "Other") so every chart stays readable. Cleaning rules sit in one SQL file, so every number on this page uses the same definitions.</p>
+    <p>The browser receives small pre-aggregated cubes (week × agency × channel × borough, and similar), not raw rows, which keeps the page fast while every filter still recalculates every KPI.</p>
+
+    <h2>Findings</h2>
+    <div id="cs-findings">
+      <div class="finding">
+        <h3>1. The headline SLA hides the problem</h3>
+        <p>Across everything, <strong>69.6%</strong> of measurable closures met the 48-hour SLA. But NYPD handles <strong>46.6%</strong> of all requests (mostly illegal parking and noise) and closes 99.9% of them inside 48 hours. Take NYPD out and the rest of the city resolves only <strong>38.8%</strong> within 48 hours. A single blended number tells the operations lead things are fine when most teams are missing the target.</p>
+      </div>
+      <div class="finding">
+        <h3>2. Housing is the biggest backlog risk</h3>
+        <p>Housing (HPD) receives <strong>325,995</strong> requests, 17% of the total, and resolves just <strong>17.6%</strong> within 48 hours. <strong>52.8%</strong> take longer than 7 days, and the median is <strong>181 hours</strong> (about 7.5 days). The slow work is concentrated: <strong>64.5%</strong> of unsanitary-condition complaints and <strong>54.2%</strong> of plumbing complaints take over 7 days. Heat and hot water, by contrast, almost always close within a week (0.4% over 7 days), which shows the team can move fast on a complaint type it prioritises.</p>
+      </div>
+      <div class="finding">
+        <h3>3. "Faster channels" is mostly a mix effect</h3>
+        <p>The mobile app looks like the best channel (92.3% within 48h, against 50.3% for phone). But <strong>80%</strong> of app requests go to NYPD, the fastest agency. Compare like with like and the gap mostly disappears: for sanitation (DSNY), online, phone and app resolve within 48h at 61%, 63% and 56%. Pushing customers to the app would not, on its own, speed anything up.</p>
+      </div>
+      <div class="finding">
+        <h3>4. Parks has an ageing backlog</h3>
+        <p>Parks (DPR) still has <strong>39.3%</strong> of its requests open at the end of the period. Even a quarter of the Parks requests from April (<strong>2,195 of 8,638</strong>) were still open at the end of September. Those are not in any resolution-time figure, because they have not closed yet, so open-request ageing needs its own report.</p>
+      </div>
+      <div class="finding">
+        <h3>5. One week broke the pattern</h3>
+        <p>Weekly volume is steady at roughly 69,000 to 81,000 requests, except the week of 29 June, which reached <strong>87,511</strong>. Drilling in, the extra demand was mostly <strong>Water System</strong> complaints, about 8,000 more than the weeks either side, plus street noise around 4 July. A one-off like this is worth a short note to the water team before it shows up as a missed SLA.</p>
+      </div>
+      <div class="finding">
+        <h3>6. Night demand is a police-noise pattern</h3>
+        <p>Overall demand peaks between 09:00 and 13:00. But <strong>28.5%</strong> of NYPD requests arrive between 22:00 and 04:00, compared with <strong>8.9%</strong> for every other agency. Out-of-hours staffing should be planned around one agency's complaint types, not the city-wide curve.</p>
+      </div>
+    </div>
+
+    <h2>Data quality: what I found and how I handled it</h2>
+    <div id="cs-dq">
+      <ul>
+        <li><strong>28,503 requests were closed at the exact second they were created</strong>, mostly at Environmental Protection (13,226) and Transportation (9,651). These look like automatic or duplicate closures, not real fixes, so they are counted separately and kept out of every SLA figure. Left in, they would make both agencies look faster than they are.</li>
+        <li><strong>624 requests were closed before they were opened</strong>, almost all at Environmental Protection. They are flagged and excluded.</li>
+        <li><strong>120,004 requests were still open</strong> when the data was extracted. They are excluded from resolution times but reported as backlog, so slow teams cannot look better by simply not closing work.</li>
+        <li><strong>The channel is unknown for 173,854 requests (8.8%)</strong>, including every Buildings (DOB) request and 59% of Transportation's. Any channel strategy for those teams is currently guesswork.</li>
+      </ul>
+      <p>Every rule is a flag in the fact table (<code>dq_flag</code>), so the excluded records can still be counted and audited rather than silently dropped.</p>
+    </div>
+
+    <h2>Recommendations</h2>
+    <div id="cs-recs">
+      <ol>
+        <li><strong>Report the SLA per agency, never only the blended figure.</strong> Show the city-wide number next to the figure without NYPD so the headline cannot hide underperformance.</li>
+        <li><strong>Give housing complaints SLAs by type.</strong> A single 48-hour target for HPD is missed four times out of five. Set realistic targets per complaint type, and run a weekly breach list for unsanitary conditions and plumbing, the two types that most often run past 7 days.</li>
+        <li><strong>Add an ageing report for open requests.</strong> Review anything open longer than 90 days with Parks first, and either close it with a reason or escalate it.</li>
+        <li><strong>Fix channel capture before investing in channel shift.</strong> Buildings and Transportation need channel recorded on every request, then compare channels within each agency, not across the city.</li>
+        <li><strong>Ask Environmental Protection about instant closures.</strong> If they are duplicates, merge them at intake; if they are auto-closures, report them as a separate outcome.</li>
+      </ol>
+    </div>
+
+    <h2>How it's built</h2>
+    <ul>
+      <li><strong>Extract:</strong> six monthly CSV pulls from the NYC Open Data API (dataset <code>erm2-nwe9</code>).</li>
+      <li><strong>Model:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/sql/02_model.sql">02_model.sql</a> builds the dimensions and fact table and flags data-quality issues.</li>
+      <li><strong>KPIs:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/sql/03_kpi_views.sql">03_kpi_views.sql</a> defines resolution bands, the reporting cubes and exact medians.</li>
+      <li><strong>Pipeline:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/pipeline/build.py">build.py</a> loads the CSVs, runs the SQL and exports the cubes to JSON.</li>
+      <li><strong>Dashboard:</strong> plain JavaScript and SVG, no chart library, light and dark themes, keyboard-accessible filters.</li>
+    </ul>
+  </article>
+
+  <footer>Data: NYC Open Data, 311 Service Requests. Built by Sai Yashwant Tavva as a portfolio case study; not affiliated with the City of New York.</footer>
+</main>
+
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  var fmt = new Intl.NumberFormat('en-GB');
+  var pct = function (x) { return isFinite(x) ? (x * 100).toFixed(1) + '%' : '–'; };
+  var BAND_LABELS = ['Under 4 hours', '4–24 hours', '1–2 days', '2–7 days', '7–30 days', 'Over 30 days'];
+  var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  var NAMES = { NYPD: 'Police (NYPD)', HPD: 'Housing (HPD)', DSNY: 'Sanitation (DSNY)', DOT: 'Transportation (DOT)',
+    DEP: 'Environmental Protection (DEP)', DPR: 'Parks (DPR)', DOB: 'Buildings (DOB)', DOHMH: 'Health (DOHMH)' };
+  function nm(k) { return NAMES[k] || k; }
+  var tip = document.getElementById('tip');
+  var D, F = { agency: 'All', channel: 'All', borough: 'All' };
+
+  function css(v) { return getComputedStyle(root).getPropertyValue(v).trim(); }
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function showTip(html, x, y) {
+    tip.innerHTML = html; tip.style.opacity = 1;
+    var r = tip.getBoundingClientRect();
+    var left = Math.min(x + 14, innerWidth - r.width - 8);
+    var top = y - r.height - 12 < 8 ? y + 16 : y - r.height - 12;
+    tip.style.left = (left + scrollX) + 'px'; tip.style.top = (top + scrollY) + 'px';
+  }
+  function hideTip() { tip.style.opacity = 0; }
+  function rowsOf(cube) {
+    var c = cube.cols;
+    return cube.rows.map(function (r) { var o = {}; for (var i = 0; i < c.length; i++) o[c[i]] = r[i]; return o; });
+  }
+  function pass(r, useBorough) {
+    return (F.agency === 'All' || r.agency_group === F.agency) &&
+           (F.channel === 'All' || r.channel === F.channel) &&
+           (!useBorough || F.borough === 'All' || r.borough === F.borough);
+  }
+  function bands(rs) { var b = [0, 0, 0, 0, 0, 0]; rs.forEach(function (r) { for (var i = 0; i < 6; i++) b[i] += r['b' + i]; }); return b; }
+  function sum(a) { return a.reduce(function (s, x) { return s + x; }, 0); }
+  function medianBand(b) {
+    var half = sum(b) / 2, acc = 0;
+    for (var i = 0; i < 6; i++) { acc += b[i]; if (acc >= half && b[i] > 0) return BAND_LABELS[i]; }
+    return '–';
+  }
+
+  // ---------- charts ----------
+  function lineChart(id, pts, opts) {
+    var box = document.getElementById(id); box.innerHTML = '';
+    var W = Math.max(box.clientWidth, 280), H = opts.h || 240, m = { t: 12, r: 16, b: 26, l: 52 };
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': opts.label }, box);
+    if (!pts.length) return;
+    var max = opts.max != null ? opts.max : Math.max.apply(null, pts.map(function (p) { return p.y; })) * 1.1;
+    var min = opts.min != null ? opts.min : 0;
+    var x = function (i) { return m.l + (pts.length === 1 ? 0 : i / (pts.length - 1)) * (W - m.l - m.r); };
+    var y = function (v) { return H - m.b - (v - min) / (max - min) * (H - m.t - m.b); };
+    var g = el('g', { class: 'grid' }, svg), ax = el('g', { class: 'axis' }, svg);
+    for (var k = 0; k <= 4; k++) {
+      var v = min + (max - min) * k / 4, yy = y(v);
+      if (k) el('line', { x1: m.l, x2: W - m.r, y1: yy, y2: yy }, g);
+      el('text', { x: m.l - 8, y: yy + 4, 'text-anchor': 'end' }, ax).textContent = opts.tick(v);
+    }
+    el('line', { class: 'base', x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, svg);
+    var step = Math.ceil(pts.length / Math.max(2, Math.floor((W - m.l - m.r) / 70)));
+    pts.forEach(function (p, i) {
+      if (i % step) return;
+      var xi = x(i), anchor = xi > W - m.r - 30 ? 'end' : 'middle';
+      el('text', { x: xi, y: H - 8, 'text-anchor': anchor }, ax).textContent = p.lab;
+    });
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p.y).toFixed(1); }).join(' ');
+    if (opts.area) el('path', { d: d + ' L' + x(pts.length - 1) + ' ' + y(min) + ' L' + x(0) + ' ' + y(min) + ' Z', fill: css('--accent'), opacity: .10 }, svg);
+    el('path', { d: d, fill: 'none', stroke: css('--accent'), 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    if (opts.target != null) {
+      var ty = y(opts.target);
+      el('line', { x1: m.l, x2: W - m.r, y1: ty, y2: ty, stroke: css('--muted'), 'stroke-dasharray': '4 4', 'stroke-width': 1 }, svg);
+      el('text', { class: 'lbl', x: W - m.r, y: ty - 6, 'text-anchor': 'end' }, svg).textContent = opts.targetLabel;
+    }
+    var cross = el('line', { y1: m.t, y2: H - m.b, stroke: css('--axis'), 'stroke-width': 1, opacity: 0 }, svg);
+    var dot = el('circle', { r: 5, fill: css('--accent'), stroke: css('--surface'), 'stroke-width': 2, opacity: 0 }, svg);
+    var hit = el('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: 'transparent' }, svg);
+    function move(e) {
+      var b = svg.getBoundingClientRect(), sx = (e.clientX - b.left) * W / b.width;
+      var i = Math.max(0, Math.min(pts.length - 1, Math.round((sx - m.l) / (W - m.l - m.r) * (pts.length - 1))));
+      cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i)); cross.setAttribute('opacity', 1);
+      dot.setAttribute('cx', x(i)); dot.setAttribute('cy', y(pts[i].y)); dot.setAttribute('opacity', 1);
+      showTip(opts.tip(pts[i]), e.clientX, e.clientY);
+    }
+    hit.addEventListener('pointermove', move);
+    hit.addEventListener('pointerleave', function () { cross.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); hideTip(); });
+  }
+
+  function hbars(id, items, opts) {
+    var box = document.getElementById(id); box.innerHTML = '';
+    var W = Math.max(box.clientWidth, 280), rowH = 30, m = { l: 108, r: 96 };
+    var H = items.length * rowH + 4;
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': opts.label }, box);
+    var max = Math.max.apply(null, items.map(function (d) { return d.v; })) || 1;
+    items.forEach(function (d, i) {
+      var y0 = i * rowH + 6, w = Math.max(2, d.v / max * (W - m.l - m.r));
+      el('text', { class: 'lbl', x: m.l - 10, y: y0 + 13, 'text-anchor': 'end' }, svg).textContent = d.lab;
+      var r = el('path', { d: 'M' + m.l + ' ' + y0 + ' h' + (w - 4) + ' a4 4 0 0 1 4 4 v10 a4 4 0 0 1 -4 4 h' + (-(w - 4)) + ' Z', fill: d.color || css('--accent') }, svg);
+      el('text', { class: 'val', x: m.l + w + 8, y: y0 + 13 }, svg).textContent = opts.valLab(d);
+      var hit = el('rect', { x: 0, y: y0 - 4, width: W, height: rowH, fill: 'transparent' }, svg);
+      hit.addEventListener('pointermove', function (e) { r.setAttribute('opacity', .8); showTip(opts.tip(d), e.clientX, e.clientY); });
+      hit.addEventListener('pointerleave', function () { r.setAttribute('opacity', 1); hideTip(); });
+    });
+  }
+
+  function heatmap(id, grid) {
+    var box = document.getElementById(id); box.innerHTML = '';
+    var W = Math.max(box.clientWidth, 280), m = { t: 4, r: 4, b: 22, l: 40 }, gap = 2;
+    var cw = (W - m.l - m.r) / 24, ch = Math.max(16, Math.min(28, cw)), H = m.t + m.b + ch * 7;
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Requests by weekday and hour' }, box);
+    var max = 0; grid.forEach(function (r) { r.forEach(function (v) { if (v > max) max = v; }); });
+    var steps = ['--seq-1', '--seq-2', '--seq-3', '--seq-4', '--seq-5', '--seq-6', '--seq-7'].map(css);
+    var total = sum(grid.map(sum));
+    grid.forEach(function (row, d) {
+      el('text', { class: 'lbl', x: m.l - 8, y: m.t + d * ch + ch / 2 + 4, 'text-anchor': 'end' }, svg).textContent = DAYS[d];
+      row.forEach(function (v, h) {
+        var idx = max ? Math.min(6, Math.floor(v / max * 7)) : 0;
+        var c = el('rect', { x: m.l + h * cw + gap / 2, y: m.t + d * ch + gap / 2, width: cw - gap, height: ch - gap, rx: 3, fill: steps[idx] }, svg);
+        c.addEventListener('pointermove', function (e) {
+          c.setAttribute('stroke', css('--text')); c.setAttribute('stroke-width', 1.5);
+          showTip('<b>' + DAYS[d] + ' ' + String(h).padStart(2, '0') + ':00–' + String(h).padStart(2, '0') + ':59</b><br>' + fmt.format(v) + ' requests <span class="k">(' + pct(v / total) + ' of week)</span>', e.clientX, e.clientY);
+        });
+        c.addEventListener('pointerleave', function () { c.removeAttribute('stroke'); hideTip(); });
+      });
+    });
+    for (var h = 0; h < 24; h += 3) el('text', { class: 'lbl', x: m.l + h * cw + cw / 2, y: H - 6, 'text-anchor': 'middle' }, svg).textContent = String(h).padStart(2, '0');
+    var lg = document.createElement('div'); lg.className = 'legend';
+    lg.innerHTML = 'Fewer <span class="ramp">' + steps.map(function (s) { return '<span style="background:' + s + '"></span>'; }).join('') + '</span> More';
+    box.appendChild(lg);
+  }
+
+  // ---------- render ----------
+  function render() {
+    var W = D.weekly.filter(function (r) { return pass(r, true); });
+    var n = sum(W.map(function (r) { return r.n; })), closed = sum(W.map(function (r) { return r.closed; }));
+    var zero = sum(W.map(function (r) { return r.zero_dur; })), b = bands(W), measured = sum(b);
+    var in48 = (b[0] + b[1] + b[2]) / measured, in7 = (b[0] + b[1] + b[2] + b[3]) / measured;
+    var kp = [
+      ['Requests', fmt.format(n), 'Apr–Sep 2026'],
+      ['Resolved within 48h', pct(in48), 'of ' + fmt.format(measured) + ' measurable closures'],
+      ['Resolved within 7 days', pct(in7), 'same base'],
+      ['Typical time to close', medianBand(b), 'band containing the median request'],
+      ['Closed instantly', pct(zero / closed), 'closed at creation, excluded from SLA'],
+      ['Still open', fmt.format(n - closed), pct((n - closed) / n) + ' of requests at extract']
+    ];
+    document.getElementById('kpis').innerHTML = kp.map(function (k) {
+      return '<div class="kpi"><div class="label">' + k[0] + '</div><div class="value' + (k[1].length > 9 ? ' long' : '') + '">' + k[1] + '</div><div class="sub">' + k[2] + '</div></div>';
+    }).join('');
+
+    // weekly series (full weeks only)
+    var wk = {};
+    W.forEach(function (r) {
+      var o = wk[r.week_start] || (wk[r.week_start] = { n: 0, b: [0, 0, 0, 0, 0, 0] });
+      o.n += r.n; for (var i = 0; i < 6; i++) o.b[i] += r['b' + i];
+    });
+    var weeks = Object.keys(wk).sort().filter(function (w) {
+      var end = new Date(w + 'T00:00:00Z'); end.setUTCDate(end.getUTCDate() + 6);
+      return w >= D.first.slice(0, 10) && end.toISOString().slice(0, 10) <= D.last.slice(0, 10);
+    });
+    var lab = function (w) { var d = new Date(w + 'T00:00:00Z'); return d.getUTCDate() + ' ' + d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }); };
+    lineChart('c-volume', weeks.map(function (w) { return { lab: lab(w), y: wk[w].n, w: w }; }), {
+      area: true, label: 'Weekly request volume', tick: function (v) { return v >= 1000 ? Math.round(v / 1000) + 'k' : Math.round(v); },
+      tip: function (p) { return '<b>Week of ' + p.lab + '</b><br>' + fmt.format(p.y) + ' requests'; }
+    });
+    lineChart('c-sla', weeks.map(function (w) {
+      var bb = wk[w].b, m = sum(bb); return { lab: lab(w), y: m ? (bb[0] + bb[1] + bb[2]) / m : 0, m: m };
+    }), {
+      min: 0, max: 1, h: 220, label: 'Share resolved within 48 hours by week', tick: function (v) { return Math.round(v * 100) + '%'; },
+      target: 0.8, targetLabel: '80% target',
+      tip: function (p) { return '<b>Week of ' + p.lab + '</b><br>' + pct(p.y) + ' within 48h<br><span class="k">' + fmt.format(p.m) + ' closures measured</span>'; }
+    });
+    hbars('c-bands', b.map(function (v, i) { return { lab: BAND_LABELS[i], v: v }; }), {
+      label: 'Closed requests by time to close',
+      valLab: function (d) { return pct(d.v / measured); },
+      tip: function (d) { return '<b>' + d.lab + '</b><br>' + fmt.format(d.v) + ' requests (' + pct(d.v / measured) + ')'; }
+    });
+
+    // tables
+    function table(id, key, rows, limit) {
+      var g = {};
+      rows.forEach(function (r) {
+        var o = g[r[key]] || (g[r[key]] = { n: 0, b: [0, 0, 0, 0, 0, 0] });
+        o.n += r.n; for (var i = 0; i < 6; i++) o.b[i] += r['b' + i];
+      });
+      var list = Object.keys(g).map(function (k) { var bb = g[k].b, m = sum(bb); return { k: k, n: g[k].n, in48: m ? (bb[0] + bb[1] + bb[2]) / m : NaN, over7: m ? (bb[4] + bb[5]) / m : NaN }; })
+        .sort(function (a, c) { return c.n - a.n; }).slice(0, limit || 99);
+      var tot = sum(rows.map(function (r) { return r.n; })), max = list.length ? list[0].n : 1;
+      return { list: list, tot: tot, max: max };
+    }
+    var ch = table('t-channel', 'channel', W);
+    document.getElementById('t-channel').innerHTML = '<table class="rows"><thead><tr><th>Channel</th><th class="barcell">Share of requests</th><th class="num">Share</th><th class="num">Within 48h</th></tr></thead><tbody>' +
+      ch.list.map(function (r) { return '<tr><td>' + r.k + '</td><td class="barcell"><div class="bar" style="width:' + (r.n / ch.max * 100) + '%"></div></td><td class="num">' + pct(r.n / ch.tot) + '</td><td class="num">' + pct(r.in48) + '</td></tr>'; }).join('') + '</tbody></table>';
+
+    var ag = table('t-agency', 'agency_group', W);
+    document.getElementById('t-agency').innerHTML = '<table class="rows"><thead><tr><th>Agency</th><th class="num">Requests</th><th class="num">Within 48h</th><th class="num">Over 7 days</th></tr></thead><tbody>' +
+      ag.list.map(function (r) { return '<tr><td>' + nm(r.k) + '</td><td class="num">' + fmt.format(r.n) + '</td><td class="num">' + pct(r.in48) + '</td><td class="num">' + pct(r.over7) + '</td></tr>'; }).join('') + '</tbody></table>';
+
+    var C = D.complaints.filter(function (r) { return pass(r, false); });
+    var cp = table('t-complaints', 'complaint_group', C.filter(function (r) { return r.complaint_group !== 'Other'; }), 10);
+    document.getElementById('t-complaints').innerHTML = '<table class="rows"><thead><tr><th>Complaint type</th><th class="barcell">Requests</th><th class="num">Requests</th><th class="num">Over 7 days</th></tr></thead><tbody>' +
+      cp.list.map(function (r) { return '<tr><td>' + r.k + '</td><td class="barcell"><div class="bar" style="width:' + (r.n / cp.max * 100) + '%"></div></td><td class="num">' + fmt.format(r.n) + '</td><td class="num">' + pct(r.over7) + '</td></tr>'; }).join('') + '</tbody></table>';
+
+    // heatmap (Mon-first rows)
+    var grid = []; for (var d = 0; d < 7; d++) { grid.push(new Array(24).fill(0)); }
+    D.heatmap.forEach(function (r) { if (pass(r, false)) grid[(r.dow + 6) % 7][r.hour] += r.n; });
+    heatmap('c-heat', grid);
+
+    document.getElementById('f-note').textContent = F.borough !== 'All' ? 'Heatmap and complaint list ignore the borough filter.' : '';
+  }
+
+  function fillSelect(id, key, values) {
+    var s = document.getElementById(id);
+    s.innerHTML = '<option value="All">All</option>' + values.map(function (v) { return '<option value="' + v + '">' + nm(v) + '</option>'; }).join('');
+    s.addEventListener('change', function () { F[key] = s.value; render(); });
+  }
+
+  function caseStudy(meta) {
+    var M = meta;
+    document.getElementById('cs-data').innerHTML = 'Source: <strong>NYC Open Data, 311 Service Requests</strong>, every request created between ' +
+      new Date(M.first).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ' and ' +
+      new Date(M.last).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ': <strong>' + fmt.format(M.total) +
+      ' requests</strong>. 311 is New York City\'s single contact point for non-emergency services, so it behaves like a large multi-channel contact centre routing work to back-office teams.';
+  }
+
+  fetch('data.json').then(function (r) { return r.json(); }).then(function (json) {
+    D = { weekly: rowsOf(json.weekly), heatmap: rowsOf(json.heatmap), complaints: rowsOf(json.complaints), first: json.meta.first, last: json.meta.last, meta: json.meta };
+    function uniq(key) {
+      var c = {}; D.weekly.forEach(function (r) { c[r[key]] = (c[r[key]] || 0) + r.n; });
+      return Object.keys(c).sort(function (a, b) { return a === 'Other' ? 1 : b === 'Other' ? -1 : c[b] - c[a]; });
+    }
+    fillSelect('f-agency', 'agency', uniq('agency_group'));
+    fillSelect('f-channel', 'channel', uniq('channel'));
+    fillSelect('f-borough', 'borough', uniq('borough'));
+    document.getElementById('f-reset').addEventListener('click', function () {
+      F = { agency: 'All', channel: 'All', borough: 'All' };
+      ['f-agency', 'f-channel', 'f-borough'].forEach(function (id) { document.getElementById(id).value = 'All'; });
+      render();
+    });
+    render();
+    caseStudy(json.meta);
+    var t; addEventListener('resize', function () { clearTimeout(t); t = setTimeout(render, 150); });
+    new MutationObserver(render).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+  }).catch(function () {
+    document.getElementById('kpis').innerHTML = '<p>Could not load data.json.</p>';
+  });
+})();
+</script>
+</body>
+</html>

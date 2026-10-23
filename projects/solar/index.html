@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar Array Output Dashboard · Sai Yashwant Tavva</title>
+<meta name="description" content="Interactive Tableau dashboard of solar array power generation: average power by month, output by site, actual vs forecast by hour, and site locations.">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/jpeg" href="../../assets/profile-64.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fbfbf9; --surface: #ffffff; --text: #16181d; --muted: #5b616e;
+  --line: #e6e6e1; --accent: #1f4fd1; --chip: #f2f2ee;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #171a20; --text: #eceef2; --muted: #9aa1ad;
+    --line: #262a33; --accent: #7ea2ff; --chip: #1e222a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #08111f; --surface: #0f1d33; --text: #f2f6fc; --muted: #9fb0c8;
+  --line: #1c3050; --accent: #19c39b; --chip: #14274a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+nav { border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.brand { font-weight: 700; color: var(--text); }
+.links { display: flex; gap: 22px; font-size: 14px; align-items: center; }
+.links a { color: var(--muted); }
+.icon-btn { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; font-size: 16px; }
+header { padding: 48px 0 24px; }
+.eyebrow { font: 500 13px/1 "JetBrains Mono", monospace; color: var(--accent); }
+h1 { font-size: clamp(28px, 4.5vw, 42px); letter-spacing: -0.025em; line-height: 1.12; margin: 12px 0 12px; }
+.lead { color: var(--muted); font-size: 17px; max-width: 720px; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); color: var(--muted); }
+
+/* Tableau renders its own white canvas, so frame it on a light surface in both themes */
+.viz-frame { background: #ffffff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; overflow-x: auto; overflow-y: hidden; }
+.viz-note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+
+article { max-width: 760px; padding: 24px 0 8px; }
+article h2 { font-size: 20px; letter-spacing: -0.01em; margin: 28px 0 8px; }
+article p, article li { color: var(--muted); }
+footer { margin-top: 40px; padding: 24px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+@media (max-width: 640px) { .links a.hide-sm { display: none; } }
+
+/* ---------- terminal top bar (matches the Risk Analyst home page) ---------- */
+.t-bar { position: sticky; top: 0; z-index: 30; background: linear-gradient(180deg, #11223b, #0d1a2e); border-bottom: 1px solid #1e3352; font-family: Barlow, system-ui, sans-serif; }
+.t-bar .in { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 16px; max-width: 1440px; margin: 0 auto; }
+.t-bar .home img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; display: block; border: 2px solid #19c39b; }
+.t-bar .who { line-height: 1.15; color: #f2f6fc; text-decoration: none; }
+.t-bar .who b { display: block; font-size: 15px; white-space: nowrap; }
+.t-bar .who span { font-size: 12px; color: #9fb0c8; }
+.t-bar .navs { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.t-bar .navs a { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 15px; text-transform: uppercase; color: #d6e1f0; border: 1px solid #2a4268; padding: 8px 12px; border-radius: 8px; text-decoration: none; }
+.t-bar .navs a:hover { border-color: #19c39b; }
+.t-bar .navs a svg { width: 18px; height: 18px; }
+.t-bar .navs a.cta { background: #19c39b; color: #03231b; border-color: #19c39b; }
+@media (max-width: 900px) { .t-bar .who span { display: none; } }
+@media (max-width: 480px) { .t-bar .navs { gap: 6px; } .t-bar .navs a { padding: 8px 9px; font-size: 14px; } .t-bar .who b { font-size: 14px; } .t-bar .navs .hide-xs { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="t-bar">
+  <div class="in">
+    <a class="home" href="../../" aria-label="Home"><img src="../../assets/profile.jpg" alt="" width="44" height="44"></a>
+    <a class="who" href="../../"><b>Sai Yashwant Tavva</b><span>Risk Analyst · Projects</span></a>
+    <nav class="navs" aria-label="Site">
+      <a href="../../#coupon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="hide-xs">Projects</span></a>
+      <a href="../../" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
+      <a class="cta" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">Email me</a>
+    </nav>
+  </div>
+</header>
+
+<header class="wrap">
+  <div class="eyebrow">Tableau dashboard · May 2026</div>
+  <h1>Solar array power output dashboard</h1>
+  <p class="lead">Power generation across a network of solar array sites: how output changes through the year, which sites produce the most, and how actual output tracks the forecast through the day. Hover, click and filter the dashboard below.</p>
+  <div class="chips"><span class="chip">Tableau</span><span class="chip">Time series</span><span class="chip">Forecast vs actual</span></div>
+</header>
+
+<main class="wrap">
+  <div class="viz-frame">
+    <!-- Tableau Public embed code for W4 / Dashboard1 -->
+    <div class='tableauPlaceholder' id='viz1792777407578' style='position: relative'><noscript><a href='https://public.tableau.com/app/profile/sai.yashwant.tavva/viz/W4_17782019939440/Dashboard1'><img alt='Solar array power output dashboard' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;WP&#47;WP6RK6ZB7&#47;1_rss.png' style='border: none; max-width: 100%' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='path' value='shared&#47;WP6RK6ZB7' /> <param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;WP&#47;WP6RK6ZB7&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-GB' /></object></div>
+    <script type='text/javascript'>
+      var divElement = document.getElementById('viz1792777407578');
+      var vizElement = divElement.getElementsByTagName('object')[0];
+      // Tableau's sizes: the desktop layout is fixed at 1120 x 607 (the frame scrolls sideways
+      // if the screen is narrower, instead of cropping); below 500px it has its own phone layout.
+      if (divElement.offsetWidth > 500) { vizElement.style.width = '1120px'; vizElement.style.height = '607px'; }
+      else { vizElement.style.width = '100%'; vizElement.style.height = '1377px'; }
+      var scriptElement = document.createElement('script');
+      scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+      vizElement.parentNode.insertBefore(scriptElement, vizElement);
+    </script>
+  </div>
+  <p class="viz-note">On a smaller screen, scroll the dashboard sideways to see all of it. Not loading? <a href="https://public.tableau.com/app/profile/sai.yashwant.tavva/viz/W4_17782019939440/Dashboard1" target="_blank" rel="noopener">Open it on Tableau Public ↗</a></p>
+
+  <article>
+    <h2>What the dashboard shows</h2>
+    <ul>
+      <li><strong>Average power by month</strong>, showing how generation rises and falls through the year</li>
+      <li><strong>Output by site</strong>, comparing the individual solar arrays</li>
+      <li><strong>Actual vs forecast by hour</strong>, the daily generation curve against the forecast</li>
+      <li><strong>A map of array site locations</strong></li>
+    </ul>
+  </article>
+</main>
+
+<footer><div class="wrap">© 2026 Sai Yashwant Tavva · <a href="../../#coupon">All projects</a> · <a href="../../">Home</a></div></footer>
+
+</body>
+</html>
