@@ -484,8 +484,14 @@ a.ball { text-decoration: none; }
   // ---------- rail highlight + terminal clock ----------
   var rail = Array.prototype.slice.call(document.querySelectorAll('.rail a[href^="#"]'));
   function onScroll() {
-    var cur = rail[0];
-    rail.forEach(function (a) { var s = document.querySelector(a.getAttribute('href')); if (s && s.getBoundingClientRect().top < 140) cur = a; });
+    // Highlight the section nearest the top of the screen (not the last one in rail order)
+    var cur = rail[0], best = -Infinity, line = innerWidth <= 900 ? 150 : 90;
+    rail.forEach(function (a) {
+      var s = document.querySelector(a.getAttribute('href'));
+      if (!s) return;
+      var top = s.getBoundingClientRect().top;
+      if (top <= line && top > best) { best = top; cur = a; }
+    });
     rail.forEach(function (a) { a.classList.toggle('on', a === cur); });
   }
   addEventListener('scroll', onScroll, { passive: true });
