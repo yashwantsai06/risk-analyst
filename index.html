@@ -57,6 +57,7 @@ button { font: inherit; }
 @media (max-width: 480px) { .navs { gap: 8px; } .navs .homebtn, .navs .cta { padding: 8px 10px; } .who b { font-size: 14px; } }
 .navs .homebtn { display: flex; align-items: center; gap: 6px; border: 1px solid #4d6aa0; padding: 8px 12px; border-radius: 8px; }
 .navs .homebtn svg { width: 18px; height: 18px; }
+@media (max-width: 480px) { .navs .hide-xs { display: none; } }
 .navs .homebtn:hover { border-color: var(--accent); }
 .navs .cta { background: var(--accent); color: var(--accent-ink); padding: 9px 14px; border-radius: 8px; }
 .navs .cta:hover { color: var(--accent-ink); filter: brightness(1.06); }
@@ -212,6 +213,7 @@ a.ball { text-decoration: none; }
     <a class="home" href="#top" aria-label="Sai Yashwant Tavva, back to top"><img src="assets/profile.jpg" alt="" width="44" height="44"></a>
     <div class="who"><b>Sai Yashwant Tavva</b><span>Risk Analyst · Portfolio</span></div>
     <nav class="navs" aria-label="Sections">
+      <a class="homebtn" href="#coupon" aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="hide-xs">Projects</span></a>
       <a class="homebtn" href="./" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
       <a class="cta" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">Email me</a>
     </nav>
