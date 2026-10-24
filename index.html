@@ -306,7 +306,7 @@ body { background: #eef2f7; color: #16233a; }
 .pass-name { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 15px; letter-spacing: .14em; color: #ffc23d; }
 .pass .nfc { width: 20px; height: 20px; color: #dbe8fb; }
 .pass-mid { display: flex; gap: 12px; align-items: center; margin: 10px 0; }
-.pass-photo { width: 100px; height: 124px; cursor: zoom-in; flex: none; border-radius: 10px; overflow: hidden; border: 2px solid #19c39b; background: radial-gradient(circle at 50% 30%, #2f6db0, #10345f); position: relative; }
+.pass-photo { width: 92px; height: 114px; cursor: zoom-in; flex: none; border-radius: 10px; overflow: hidden; border: 2px solid #19c39b; background: radial-gradient(circle at 50% 30%, #2f6db0, #10345f); position: relative; }
 .pass-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pass-photo model-viewer { position: absolute; inset: 0; width: 100%; height: 100%; --poster-color: transparent; background: transparent; }
 .pass-who { min-width: 0; line-height: 1.2; }
@@ -328,6 +328,14 @@ body { background: #eef2f7; color: #16233a; }
 .avatar-modal model-viewer { width: 100%; height: 100%; --poster-color: transparent; background: transparent; }
 .avatar-modal .close { position: absolute; top: 10px; right: 10px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(255,255,255,.9); color: #16233a; font-size: 18px; cursor: pointer; }
 .avatar-modal .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px; text-align: center; color: #fff; font-size: 13px; background: linear-gradient(transparent, rgba(5,20,45,.85)); pointer-events: none; }
+
+/* Analyst pass alignment */
+.pass-mid { align-items: center; gap: 14px; }
+.pass-who { flex: 1; }
+.pass-who b { font-size: 16px; line-height: 1.05; letter-spacing: .02em; }
+.pass-who .role { margin-top: 4px; }
+.pass-who .tier { white-space: nowrap; margin-top: 8px; padding: 3px 10px; font-size: 11px; }
+.pass-bottom { margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -555,11 +563,11 @@ body { background: #eef2f7; color: #16233a; }
           <svg class="nfc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8.5 8.5a5 5 0 0 1 0 7M12 6a8.5 8.5 0 0 1 0 12M15.5 3.5a12 12 0 0 1 0 17"/></svg>
         </div>
         <div class="pass-mid">
-          <button type="button" class="pass-photo" id="pass-photo" aria-label="Enlarge 3D avatar"><img src="assets/profile.jpg" alt="Sai Yashwant Tavva" width="100" height="124"><span class="zoom-hint">Tap to zoom</span></button>
+          <button type="button" class="pass-photo" id="pass-photo" aria-label="Enlarge 3D avatar"><img src="assets/profile.jpg" alt="Sai Yashwant Tavva" width="92" height="114"><span class="zoom-hint">Tap to zoom</span></button>
           <div class="pass-who">
             <b>SAI YASHWANT TAVVA</b>
             <span class="role">Risk Analyst</span>
-            <span class="tier">★ Member since 2026</span>
+            <span class="tier">★ Since 2026</span>
           </div>
         </div>
         <div class="pass-bottom">
@@ -707,7 +715,17 @@ body { background: #eef2f7; color: #16233a; }
     mv.setAttribute('camera-orbit', '0deg 88deg 0.85m');
     mv.setAttribute('field-of-view', '28deg');
     mv.setAttribute('exposure', '1.1');
-    if (!reduce) { mv.setAttribute('auto-rotate', ''); mv.setAttribute('rotation-per-second', '18deg'); }
+    // Gentle sway (about ±18°) so the face stays towards the viewer
+    if (!reduce) {
+      mv.addEventListener('load', function () {
+        var t0 = performance.now();
+        (function sway(t) {
+          var a = Math.sin((t - t0) / 1800) * 18;
+          mv.cameraOrbit = a.toFixed(1) + 'deg 88deg 0.85m';
+          requestAnimationFrame(sway);
+        })(t0);
+      });
+    }
     mv.style.opacity = 0; mv.style.transition = 'opacity .4s';
     mv.addEventListener('load', function () {
       mv.style.opacity = 1;
