@@ -295,6 +295,28 @@ body { background: #eef2f7; color: #16233a; }
 .stat b { display: block; font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 24px; line-height: 1.05; color: #1a3361; }
 .stat span { display: block; margin-top: 4px; font-size: 12px; color: #5b6b85; line-height: 1.3; }
 @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ===== Analyst pass (loyalty-card style) ===== */
+.ad .pass { position: relative; z-index: 1; margin: 6px 4px 16px; padding: 12px 14px; border-radius: 14px; color: #fff; transform: rotate(-4deg);
+  background: radial-gradient(120% 90% at 100% 0%, #3b8fd8 0%, transparent 55%), linear-gradient(135deg, #1a73b8 0%, #12497f 60%, #0e3a68 100%);
+  box-shadow: 0 14px 28px rgba(5, 20, 45, .45), inset 0 1px 0 rgba(255,255,255,.18); overflow: hidden; }
+.ad .pass::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.18) 50%, transparent 65%); transform: translateX(-120%); animation: pass-shine 5s ease-in-out infinite; pointer-events: none; }
+@keyframes pass-shine { 0%, 60% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+.pass-top { display: flex; justify-content: space-between; align-items: center; }
+.pass-name { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 15px; letter-spacing: .14em; color: #ffc23d; }
+.pass .nfc { width: 20px; height: 20px; color: #dbe8fb; }
+.pass-mid { display: flex; gap: 12px; align-items: center; margin: 10px 0; }
+.pass-photo { width: 72px; height: 88px; flex: none; border-radius: 10px; overflow: hidden; border: 2px solid #19c39b; background: radial-gradient(circle at 50% 30%, #2f6db0, #10345f); position: relative; }
+.pass-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pass-photo model-viewer { position: absolute; inset: 0; width: 100%; height: 100%; --poster-color: transparent; background: transparent; }
+.pass-who { min-width: 0; line-height: 1.2; }
+.pass-who b { display: block; font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 17px; letter-spacing: .03em; }
+.pass-who .role { display: block; font-size: 12px; color: #dbe8fb; margin-top: 2px; }
+.pass-who .tier { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; color: #03231b; background: #19c39b; border-radius: 999px; padding: 2px 8px; letter-spacing: .03em; }
+.pass-bottom { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.pass .barcode { width: 110px; height: 22px; border-radius: 2px; background: repeating-linear-gradient(90deg, #fff 0 2px, transparent 2px 3px, #fff 3px 4px, transparent 4px 7px, #fff 7px 10px, transparent 10px 11px, #fff 11px 12px, transparent 12px 15px); opacity: .9; }
+.pass .memno { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 10px; color: #dbe8fb; letter-spacing: .04em; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .ad .pass::before { animation: none; } }
 </style>
 </head>
 <body>
@@ -516,7 +538,24 @@ body { background: #eef2f7; color: #16233a; }
     <div class="ad">
       <h2 class="cond">Hire to<br>unlock<br>insights</h2>
       <p>Betting data, statistical testing and SQL from someone already working in the industry.</p>
-      <div class="card"><b>SAI · RISK</b><span>Analyst card · valid from today</span></div>
+      <div class="pass" aria-label="Analyst pass for Sai Yashwant Tavva">
+        <div class="pass-top">
+          <span class="pass-name">ANALYST PASS</span>
+          <svg class="nfc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8.5 8.5a5 5 0 0 1 0 7M12 6a8.5 8.5 0 0 1 0 12M15.5 3.5a12 12 0 0 1 0 17"/></svg>
+        </div>
+        <div class="pass-mid">
+          <div class="pass-photo" id="pass-photo"><img src="assets/profile.jpg" alt="Sai Yashwant Tavva" width="72" height="88"></div>
+          <div class="pass-who">
+            <b>SAI YASHWANT TAVVA</b>
+            <span class="role">Risk Analyst</span>
+            <span class="tier">★ Member since 2026</span>
+          </div>
+        </div>
+        <div class="pass-bottom">
+          <span class="barcode" aria-hidden="true"></span>
+          <span class="memno">No. SYT · 2026 · RA</span>
+        </div>
+      </div>
       <a class="offer" href="projects/">See current projects</a>
     </div>
 
@@ -630,6 +669,32 @@ body { background: #eef2f7; color: #16233a; }
   var clock = document.getElementById('clock');
   function tick() { var d = new Date(); clock.textContent = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ' · ' + d.toLocaleDateString('en-GB'); }
   tick(); setInterval(tick, 30000);
+
+  // ---------- Analyst pass: swap the photo for the animated 3D avatar when it loads ----------
+  (function () {
+    var box = document.getElementById('pass-photo');
+    if (!box) return;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var sc = document.createElement('script');
+    sc.type = 'module';
+    sc.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
+    document.head.appendChild(sc);
+    var mv = document.createElement('model-viewer');
+    mv.setAttribute('src', 'assets/avatar.glb');
+    mv.setAttribute('alt', '3D avatar of Sai Yashwant Tavva');
+    mv.setAttribute('disable-zoom', ''); mv.setAttribute('disable-pan', ''); mv.setAttribute('interaction-prompt', 'none');
+    mv.setAttribute('camera-target', '0m 1.45m 0m');
+    mv.setAttribute('camera-orbit', '0deg 85deg 1.1m');
+    mv.setAttribute('field-of-view', '30deg');
+    mv.setAttribute('exposure', '1.1');
+    if (!reduce) { mv.setAttribute('auto-rotate', ''); mv.setAttribute('rotation-per-second', '18deg'); }
+    mv.style.opacity = 0; mv.style.transition = 'opacity .4s';
+    mv.addEventListener('load', function () {
+      mv.style.opacity = 1;
+      var img = box.querySelector('img'); if (img) img.style.visibility = 'hidden';
+    });
+    box.appendChild(mv);
+  })();
 })();
 </script>
 </body>
