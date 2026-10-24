@@ -683,9 +683,11 @@ body { background: #eef2f7; color: #16233a; }
     mv.setAttribute('src', 'assets/avatar.glb');
     mv.setAttribute('alt', '3D avatar of Sai Yashwant Tavva');
     mv.setAttribute('disable-zoom', ''); mv.setAttribute('disable-pan', ''); mv.setAttribute('interaction-prompt', 'none');
-    mv.setAttribute('camera-target', '0m 1.45m 0m');
-    mv.setAttribute('camera-orbit', '0deg 85deg 1.1m');
-    mv.setAttribute('field-of-view', '30deg');
+    // Frame head and shoulders (the default zoom limit would show the whole body)
+    mv.setAttribute('min-camera-orbit', 'auto auto 0.3m');
+    mv.setAttribute('camera-target', '0m 1.5m 0m');
+    mv.setAttribute('camera-orbit', '0deg 88deg 0.95m');
+    mv.setAttribute('field-of-view', '28deg');
     mv.setAttribute('exposure', '1.1');
     if (!reduce) { mv.setAttribute('auto-rotate', ''); mv.setAttribute('rotation-per-second', '18deg'); }
     mv.style.opacity = 0; mv.style.transition = 'opacity .4s';
