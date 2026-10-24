@@ -282,6 +282,12 @@ body { background: #eef2f7; color: #16233a; }
 .event.match .side { font-size: 18px; }
 .event.match .side span { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.1; }
 .event.match .mid small { white-space: normal; max-width: 150px; }
+
+/* MSc coursework, shown under the MSc row in the Education coupon */
+.coupon .course { padding: 0 12px 12px; }
+.coupon .course-h { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #5d6a80; margin: 0 0 6px; }
+.coupon .course-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.coupon .course-list span { font-size: 12px; color: #1d3f78; background: #e8eef8; border: 1px solid #d3dcea; border-radius: 6px; padding: 3px 8px; }
 </style>
 </head>
 <body>
@@ -466,7 +472,8 @@ body { background: #eef2f7; color: #16233a; }
       <div class="panel-h"><h2 class="cond">Education</h2><span class="selectbox"><small>Showing</small>Degrees</span></div>
       <div class="coupon">
         <div class="cols"><span style="text-align:left">Course</span><span>From</span><span>To</span><span>Level</span></div>
-        <div class="crow"><div class="t"><b>MSc Business Analytics</b><span>The University of Law · London</span></div><span class="ball">2025</span><span class="ball">2028</span><span class="ball up">MSc</span></div>
+        <div class="crow"><div class="t"><b>MSc Business Analytics with Professional Practice</b><span>The University of Law · London</span></div><span class="ball">Sep 25</span><span class="ball">Oct 27</span><span class="ball up">MSc</span></div>
+        <div class="course"><span class="course-h">Relevant coursework</span><div class="course-list"><span>Data Design Management</span><span>Data Analysis for Business</span><span>Data Visualisation</span><span>Data and Decision Making</span><span>Digital Marketing Analytics</span><span>Data Security</span><span>Innovation Management in a Digital Age</span><span>Global Business Strategy</span><span>Business Simulation</span></div></div>
         <div class="crow"><div class="t"><b>BTech, Electrical &amp; Comms Eng.</b><span>Vaagdevi Engineering College</span></div><span class="ball">2018</span><span class="ball">2022</span><span class="ball">BTech</span></div>
       </div>
     </section>
