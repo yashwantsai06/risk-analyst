@@ -711,8 +711,8 @@ body { background: #eef2f7; color: #16233a; }
     mv.setAttribute('disable-zoom', ''); mv.setAttribute('disable-pan', ''); mv.setAttribute('interaction-prompt', 'none');
     // Frame head and shoulders (the default zoom limit would show the whole body)
     mv.setAttribute('min-camera-orbit', 'auto auto 0.3m');
-    mv.setAttribute('camera-target', '0m 1.5m 0m');
-    mv.setAttribute('camera-orbit', '0deg 88deg 0.85m');
+    mv.setAttribute('camera-target', '0m 1.6m 0m');   // face height in the model (head 1.61m, top 1.78m)
+    mv.setAttribute('camera-orbit', '0deg 88deg 1.15m');
     mv.setAttribute('field-of-view', '28deg');
     mv.setAttribute('exposure', '1.1');
     // Gentle sway (about ±18°) so the face stays towards the viewer
@@ -721,7 +721,7 @@ body { background: #eef2f7; color: #16233a; }
         var t0 = performance.now();
         (function sway(t) {
           var a = Math.sin((t - t0) / 1800) * 18;
-          mv.cameraOrbit = a.toFixed(1) + 'deg 88deg 0.85m';
+          mv.cameraOrbit = a.toFixed(1) + 'deg 88deg 1.15m';
           requestAnimationFrame(sway);
         })(t0);
       });
