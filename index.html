@@ -378,6 +378,19 @@ body { background: #eef2f7; color: #16233a; }
   .b-badge { width: 84px; height: 84px; font-size: 14px; }
   .b-badge span { font-size: 10px; }
 }
+
+/* ===== Top picks carousel (scrolls like the terminal) ===== */
+.picks-wrap { position: relative; }
+.upper .picks { display: flex; gap: 12px; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 2px 2px 6px; grid-template-columns: none; }
+.upper .picks::-webkit-scrollbar { display: none; }
+.upper .pick { flex: 0 0 calc((100% - 36px) / 4); scroll-snap-align: start; }
+.picks-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 34px; height: 56px; border: 0; border-radius: 8px; background: rgba(40, 52, 72, .85); color: #fff; font-size: 26px; line-height: 1; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.picks-arrow:hover { background: rgba(25, 195, 155, .95); color: #03231b; }
+.picks-arrow.prev { left: -6px; }
+.picks-arrow.next { right: -6px; }
+@media (max-width: 1100px) { .upper .pick { flex-basis: calc((100% - 24px) / 3); } }
+@media (max-width: 900px)  { .upper .pick { flex-basis: calc((100% - 12px) / 2); } }
+@media (max-width: 560px)  { .upper .pick { flex-basis: 82%; } .picks-arrow { display: none; } }
 </style>
 </head>
 <body>
@@ -418,7 +431,9 @@ body { background: #eef2f7; color: #16233a; }
     </div>
 
     <h3 class="picks-h cond">Today's top picks</h3>
-    <div class="picks">
+    <div class="picks-wrap" id="picks-wrap">
+    <button type="button" class="picks-arrow prev" id="picks-prev" aria-label="Previous picks">‹</button>
+    <div class="picks" id="picks" tabindex="0" aria-label="Today's top picks, scrolling">
       <a class="pick" href="projects/service-ops/">
         <div class="pick-h"><span>Case study</span><span>Go to project ›</span></div>
         <b>Service Operations MI</b>
@@ -443,6 +458,32 @@ body { background: #eef2f7; color: #16233a; }
         <ul><li>Power by month</li><li>Output by site</li><li>Actual v forecast</li></ul>
         <span class="pick-price">Hourly</span>
       </a>
+      <a class="pick" href="projects/">
+        <div class="pick-h"><span>Power BI</span><span>Go to project ›</span></div>
+        <b>Retail case study</b>
+        <ul><li>15,000 records</li><li>Power BI v Tableau</li><li>WCAG accessibility check</li></ul>
+        <span class="pick-price">15k</span>
+      </a>
+      <a class="pick" href="#form">
+        <div class="pick-h boost"><span>Internship</span><span>See experience ›</span></div>
+        <b>Rolls-Royce supply chain plan</b>
+        <ul><li>Springpod micro-internship</li><li>Strategic recommendations</li><li>Implementation plan</li></ul>
+        <span class="pick-price">Excellent</span>
+      </a>
+      <a class="pick" href="#talks">
+        <div class="pick-h"><span>Talks</span><span>See talks ›</span></div>
+        <b>Talks &amp; workshops</b>
+        <ul><li>5 events, 2024–2025</li><li>Angular and UI/UX</li><li>Alumni chief guest</li></ul>
+        <span class="pick-price">50+ taught</span>
+      </a>
+      <a class="pick" href="#form">
+        <div class="pick-h boost"><span>Developer</span><span>See experience ›</span></div>
+        <b>SQL query tuning</b>
+        <ul><li>SQL Server</li><li>Slow queries rewritten</li><li>Production web app</li></ul>
+        <span class="pick-price">−30% latency</span>
+      </a>
+    </div>
+    <button type="button" class="picks-arrow next" id="picks-next" aria-label="Next picks">›</button>
     </div>
   </div>
 </section>
@@ -864,6 +905,36 @@ body { background: #eef2f7; color: #16233a; }
     if (!el) return;
     function t() { var d = new Date(); el.textContent = d.toLocaleTimeString('en-GB') + ' | ' + d.toLocaleDateString('en-GB'); }
     t(); setInterval(t, 1000);
+  })();
+
+  // Top picks: auto-advance one card at a time, loop, pause on hover/touch/focus
+  (function () {
+    var row = document.getElementById('picks');
+    if (!row) return;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function step() { var c = row.querySelector('.pick'); return c ? c.getBoundingClientRect().width + 12 : 300; }
+    function next() {
+      var atEnd = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+      if (atEnd) row.scrollTo({ left: 0, behavior: 'smooth' });
+      else row.scrollBy({ left: step(), behavior: 'smooth' });
+    }
+    function prev() {
+      if (row.scrollLeft <= 4) row.scrollTo({ left: row.scrollWidth, behavior: 'smooth' });
+      else row.scrollBy({ left: -step(), behavior: 'smooth' });
+    }
+    document.getElementById('picks-next').addEventListener('click', function () { next(); restart(); });
+    document.getElementById('picks-prev').addEventListener('click', function () { prev(); restart(); });
+    var timer = null, paused = false;
+    function start() { if (!reduce && !timer) timer = setInterval(function () { if (!paused && !document.hidden) next(); }, 3500); }
+    function restart() { clearInterval(timer); timer = null; start(); }
+    var wrap = document.getElementById('picks-wrap');
+    wrap.addEventListener('mouseenter', function () { paused = true; });
+    wrap.addEventListener('mouseleave', function () { paused = false; });
+    wrap.addEventListener('focusin', function () { paused = true; });
+    wrap.addEventListener('focusout', function () { paused = false; });
+    row.addEventListener('touchstart', function () { paused = true; }, { passive: true });
+    row.addEventListener('touchend', function () { setTimeout(function () { paused = false; }, 4000); }, { passive: true });
+    start();
   })();
 })();
 </script>
