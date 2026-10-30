@@ -336,6 +336,48 @@ body { background: #eef2f7; color: #16233a; }
 .pass-who .role { margin-top: 4px; }
 .pass-who .tier { white-space: nowrap; margin-top: 8px; padding: 3px 10px; font-size: 11px; }
 .pass-bottom { margin-top: 2px; }
+
+/* ===== Upper screen: banners + today's top picks ===== */
+.upper { background: linear-gradient(180deg, #1a3c78 0%, #1b4489 100%); border-bottom: 1px solid #34548f; }
+.upper-in { max-width: 1440px; margin: 0 auto; padding: 14px 16px 18px; position: relative; }
+.upper-time { font-size: 11px; color: #c7d4ea; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.banners { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
+.banner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 170px; padding: 18px 20px; border-radius: 12px; overflow: hidden; color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,.12); }
+.banner:hover { filter: brightness(1.05); }
+.b-left { background: radial-gradient(90% 120% at 85% 30%, #3f8fe0 0%, transparent 60%), linear-gradient(120deg, #0f3b7a, #1d5fb8); }
+.b-right { background: radial-gradient(80% 120% at 90% 80%, rgba(25,195,155,.45) 0%, transparent 60%), linear-gradient(120deg, #123a73, #1b4f9a); }
+.b-text { position: relative; z-index: 1; max-width: 62%; }
+.banner h2 { margin: 0; font-size: clamp(26px, 3vw, 40px); line-height: .95; font-weight: 800; color: #ffc23d; text-shadow: 0 2px 0 rgba(0,0,0,.18); }
+.banner p { margin: 10px 0 12px; font-size: 13px; color: #e6eefb; line-height: 1.4; }
+.banner p b { color: #fff; }
+.b-btn { display: inline-block; background: #19c39b; color: #03231b; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; padding: 7px 14px; border-radius: 6px; }
+.b-photo { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #ffc23d; box-shadow: 0 10px 24px rgba(0,0,0,.35); flex: none; }
+.b-badge { flex: none; width: 140px; height: 140px; border-radius: 50%; display: grid; place-content: center; text-align: center; background: #ffc23d; color: #2b1d00; font-weight: 800; font-size: 22px; line-height: 1; transform: rotate(-8deg); box-shadow: 0 10px 24px rgba(0,0,0,.3); }
+.b-badge span { display: block; font-size: 14px; margin-bottom: 4px; }
+.picks-h { margin: 16px 0 8px; font-size: 20px; font-weight: 800; color: #fff; }
+.picks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.pick { display: flex; flex-direction: column; background: #fff; color: #16233a; border-radius: 10px; overflow: hidden; text-decoration: none; padding: 0 12px 12px; box-shadow: 0 2px 6px rgba(5,20,45,.25); }
+.pick:hover { outline: 2px solid #19c39b; }
+.pick-h { display: flex; justify-content: space-between; margin: 0 -12px 8px; padding: 6px 12px; background: #1d5fb8; color: #fff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.pick-h.boost { background: #ffc23d; color: #2b1d00; }
+.pick-h span:last-child { text-transform: none; font-weight: 600; opacity: .9; }
+.pick b { font-size: 14px; line-height: 1.2; }
+.pick ul { list-style: none; margin: 6px 0 10px; padding: 0; font-size: 12px; color: #5b6b85; }
+.pick li { padding-left: 16px; position: relative; margin: 2px 0; }
+.pick li::before { content: "✓"; position: absolute; left: 0; color: #19c39b; font-weight: 800; }
+.pick-price { margin-top: auto; align-self: flex-end; background: #1e4585; color: #fff; font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 999px; }
+@media (max-width: 900px) {
+  .banners { grid-template-columns: 1fr; }
+  .picks { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+  .pick { scroll-snap-align: start; }
+}
+@media (max-width: 480px) {
+  .banner { min-height: 0; padding: 16px; }
+  .b-text { max-width: 100%; }
+  .b-photo { width: 84px; height: 84px; }
+  .b-badge { width: 84px; height: 84px; font-size: 14px; }
+  .b-badge span { font-size: 10px; }
+}
 </style>
 </head>
 <body>
@@ -351,6 +393,59 @@ body { background: #eef2f7; color: #16233a; }
     </nav>
   </div>
 </header>
+
+<section class="upper" aria-label="Highlights">
+  <div class="upper-in">
+    <div class="upper-time" id="upper-time" aria-hidden="true"></div>
+
+    <div class="banners">
+      <a class="banner b-left" href="projects/service-ops/">
+        <div class="b-text">
+          <h2 class="cond">The real number,<br>not the headline</h2>
+          <p>69.6% headline SLA → <b>38.8% real</b>. 1.96M records checked, 28,503 flagged.</p>
+          <span class="b-btn">See the case study</span>
+        </div>
+        <img class="b-photo" src="assets/profile.jpg" alt="" width="150" height="150">
+      </a>
+      <a class="banner b-right" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">
+        <div class="b-text">
+          <h2 class="cond">Open to<br>Risk Analyst roles</h2>
+          <p>Customer Service Manager at Entain · MSc Business Analytics · SQL &amp; Python</p>
+          <span class="b-btn">Book an interview</span>
+        </div>
+        <div class="b-badge cond" aria-hidden="true"><span>Already</span>in betting</div>
+      </a>
+    </div>
+
+    <h3 class="picks-h cond">Today's top picks</h3>
+    <div class="picks">
+      <a class="pick" href="projects/service-ops/">
+        <div class="pick-h"><span>Case study</span><span>Go to project ›</span></div>
+        <b>Service Operations MI</b>
+        <ul><li>SQL star schema</li><li>1.96M records</li><li>28,503 flagged</li></ul>
+        <span class="pick-price">38.8%</span>
+      </a>
+      <a class="pick" href="projects/">
+        <div class="pick-h"><span>Capstone</span><span>Go to project ›</span></div>
+        <b>Football data v bookmaker odds</b>
+        <ul><li>McNemar's test</li><li>Chronological split</li><li>5-fold cross-validation</li></ul>
+        <span class="pick-price">p 0.579</span>
+      </a>
+      <a class="pick" href="projects/uk-rental/">
+        <div class="pick-h boost"><span>Tableau</span><span>Go to project ›</span></div>
+        <b>UK rental properties</b>
+        <ul><li>Rent by city</li><li>Revenue</li><li>Occupancy rate</li></ul>
+        <span class="pick-price">4 cities</span>
+      </a>
+      <a class="pick" href="projects/solar/">
+        <div class="pick-h boost"><span>Tableau</span><span>Go to project ›</span></div>
+        <b>Solar output v forecast</b>
+        <ul><li>Power by month</li><li>Output by site</li><li>Actual v forecast</li></ul>
+        <span class="pick-price">Hourly</span>
+      </a>
+    </div>
+  </div>
+</section>
 
 <div class="term" id="top">
 
@@ -761,6 +856,14 @@ body { background: #eef2f7; color: #16233a; }
     document.getElementById('avatar-close').addEventListener('click', closeBig);
     modal.addEventListener('click', function (e) { if (e.target === modal) closeBig(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeBig(); });
+  })();
+
+  // Upper-screen clock, like the terminal's top-left timestamp
+  (function () {
+    var el = document.getElementById('upper-time');
+    if (!el) return;
+    function t() { var d = new Date(); el.textContent = d.toLocaleTimeString('en-GB') + ' | ' + d.toLocaleDateString('en-GB'); }
+    t(); setInterval(t, 1000);
   })();
 })();
 </script>
