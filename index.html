@@ -396,6 +396,18 @@ body { background: #eef2f7; color: #16233a; }
 .picks-arrow.prev { left: 0; }
 .picks-arrow.next { right: 0; }
 @media (max-width: 560px) { .picks-wrap { padding: 0; } }
+
+/* ===== Rotating banners with dots (like the terminal's top screen) ===== */
+.rot { min-width: 0; }
+.rot-stage { position: relative; }
+.rot .banner { position: absolute; inset: 0; opacity: 0; visibility: hidden; transform: translateX(14px); transition: opacity .6s ease, transform .6s ease, visibility 0s .6s; }
+.rot .banner.on { position: relative; opacity: 1; visibility: visible; transform: none; transition: opacity .6s ease, transform .6s ease; }
+.b-left2 { background: radial-gradient(90% 120% at 85% 30%, #ffb02e55 0%, transparent 60%), linear-gradient(120deg, #123a73, #1d5fb8); }
+.b-right2 { background: radial-gradient(80% 120% at 90% 80%, rgba(255,194,61,.35) 0%, transparent 60%), linear-gradient(120deg, #0f3b7a, #1b4f9a); }
+.dots { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+.dots button { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: rgba(255,255,255,.45); cursor: pointer; }
+.dots button[aria-selected="true"] { background: #fff; width: 22px; border-radius: 999px; }
+@media (prefers-reduced-motion: reduce) { .rot .banner, .rot .banner.on { transition: none; transform: none; } }
 </style>
 </head>
 <body>
@@ -417,7 +429,9 @@ body { background: #eef2f7; color: #16233a; }
     <div class="upper-time" id="upper-time" aria-hidden="true"></div>
 
     <div class="banners">
-      <a class="banner b-left" href="projects/service-ops/">
+      <div class="rot" data-delay="0" aria-roledescription="carousel" aria-label="Featured evidence">
+        <div class="rot-stage">
+      <a class="banner on b-left" href="projects/service-ops/">
         <div class="b-text">
           <h2 class="cond">The real number,<br>not the headline</h2>
           <p>69.6% headline SLA → <b>38.8% real</b>. 1.96M records checked, 28,503 flagged.</p>
@@ -425,7 +439,20 @@ body { background: #eef2f7; color: #16233a; }
         </div>
         <img class="b-photo" src="assets/profile.jpg" alt="" width="150" height="150">
       </a>
-      <a class="banner b-right" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">
+      <a class="banner b-left2" href="projects/">
+        <div class="b-text">
+          <h2 class="cond">Tested against<br>the bookmaker</h2>
+          <p>MSc capstone: does match data beat the odds? McNemar's test, chronological split, 5-fold CV. <b>p = 0.579</b>.</p>
+          <span class="b-btn">See the project</span>
+        </div>
+        <div class="b-badge cond" aria-hidden="true"><span>Graded</span>Excellent</div>
+      </a>
+        </div>
+        <div class="dots" role="tablist"></div>
+      </div>
+      <div class="rot" data-delay="3000" aria-roledescription="carousel" aria-label="About me">
+        <div class="rot-stage">
+      <a class="banner on b-right" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">
         <div class="b-text">
           <h2 class="cond">Open to<br>Risk Analyst roles</h2>
           <p>Customer Service Manager at Entain · MSc Business Analytics · SQL &amp; Python</p>
@@ -433,6 +460,17 @@ body { background: #eef2f7; color: #16233a; }
         </div>
         <div class="b-badge cond" aria-hidden="true"><span>Already</span>in betting</div>
       </a>
+      <a class="banner b-right2" href="#talks">
+        <div class="b-text">
+          <h2 class="cond">Explains data<br>to anyone</h2>
+          <p>5 talks and workshops on Angular and UI/UX, including alumni chief guest at SYPRO 6.0.</p>
+          <span class="b-btn">See talks</span>
+        </div>
+        <div class="b-badge cond" aria-hidden="true"><span>Taught</span>50+</div>
+      </a>
+        </div>
+        <div class="dots" role="tablist"></div>
+      </div>
     </div>
 
     <h3 class="picks-h cond">Today's top picks</h3>
@@ -940,6 +978,37 @@ body { background: #eef2f7; color: #16233a; }
     row.addEventListener('touchstart', function () { paused = true; }, { passive: true });
     row.addEventListener('touchend', function () { setTimeout(function () { paused = false; }, 4000); }, { passive: true });
     start();
+  })();
+
+  // Rotating banners: each slot cycles its banners, with clickable dots
+  (function () {
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('.rot').forEach(function (rot) {
+      var slides = Array.prototype.slice.call(rot.querySelectorAll('.banner'));
+      var dots = rot.querySelector('.dots'), i = 0, paused = false;
+      slides.forEach(function (sl, k) {
+        sl.setAttribute('aria-roledescription', 'slide');
+        sl.setAttribute('aria-label', (k + 1) + ' of ' + slides.length);
+        var d = document.createElement('button');
+        d.type = 'button'; d.setAttribute('role', 'tab'); d.setAttribute('aria-label', 'Show banner ' + (k + 1));
+        d.addEventListener('click', function () { show(k); });
+        dots.appendChild(d);
+      });
+      function show(k) {
+        i = (k + slides.length) % slides.length;
+        slides.forEach(function (sl, n) { sl.classList.toggle('on', n === i); sl.tabIndex = n === i ? 0 : -1; });
+        Array.prototype.forEach.call(dots.children, function (d, n) { d.setAttribute('aria-selected', n === i); });
+      }
+      show(0);
+      rot.addEventListener('mouseenter', function () { paused = true; });
+      rot.addEventListener('mouseleave', function () { paused = false; });
+      rot.addEventListener('focusin', function () { paused = true; });
+      rot.addEventListener('focusout', function () { paused = false; });
+      if (reduce) return;
+      setTimeout(function () {
+        setInterval(function () { if (!paused && !document.hidden) show(i + 1); }, 6000);
+      }, +rot.dataset.delay || 0);
+    });
   })();
 })();
 </script>
