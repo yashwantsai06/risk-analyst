@@ -123,7 +123,7 @@ footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--lin
   .filters .note { margin-left: 0; }
 }
 
-/* ---------- terminal top bar (matches the Risk Analyst home page) ---------- */
+/* ---------- terminal top bar (matches the home page) ---------- */
 .t-bar { position: sticky; top: 0; z-index: 30; background: linear-gradient(180deg, #22407a, #1a3361); border-bottom: 1px solid #34548f; font-family: Barlow, system-ui, sans-serif; }
 .t-bar .in { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 16px; max-width: 1440px; margin: 0 auto; }
 .t-bar .home img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; display: block; border: 2px solid #19c39b; }
@@ -164,11 +164,11 @@ footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--lin
 <header class="sbar">
   <div class="in">
     <a class="me" href="../../" aria-label="Home"><img src="../../assets/profile.jpg" alt="" width="44" height="44"></a>
-    <a class="who" href="../../"><b>Sai Yashwant Tavva</b><span>Risk Analyst</span></a>
+    <a class="who" href="../../"><b>Sai Yashwant Tavva</b><span>Analyst · Risk · Data · BI · Business</span></a>
     <nav class="navs" aria-label="Site">
       <a class="on" aria-current="page" href="../../projects/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="hide-xs">Projects</span></a>
       <a href="../../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
-      <a class="cta" href="mailto:yashwant06@gmail.com?subject=Risk%20Analyst%20application%20-%20Sai%20Yashwant%20Tavva">Email me</a>
+      <a class="cta" href="mailto:yashwant06@gmail.com?subject=Analyst%20application%20-%20Sai%20Yashwant%20Tavva">Email me</a>
     </nav>
   </div>
 </header>
@@ -301,9 +301,9 @@ footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--lin
     <h2>How it's built</h2>
     <ul>
       <li><strong>Extract:</strong> six monthly CSV pulls from the NYC Open Data API (dataset <code>erm2-nwe9</code>).</li>
-      <li><strong>Model:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/sql/02_model.sql">02_model.sql</a> builds the dimensions and fact table and flags data-quality issues.</li>
-      <li><strong>KPIs:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/sql/03_kpi_views.sql">03_kpi_views.sql</a> defines resolution bands, the reporting cubes and exact medians.</li>
-      <li><strong>Pipeline:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/pipeline/build.py">build.py</a> loads the CSVs, runs the SQL and exports the cubes to JSON.</li>
+      <li><strong>Model:</strong> <a href="https://github.com/yashwantsai06/analyst/blob/main/projects/service-ops/sql/02_model.sql">02_model.sql</a> builds the dimensions and fact table and flags data-quality issues.</li>
+      <li><strong>KPIs:</strong> <a href="https://github.com/yashwantsai06/analyst/blob/main/projects/service-ops/sql/03_kpi_views.sql">03_kpi_views.sql</a> defines resolution bands, the reporting cubes and exact medians.</li>
+      <li><strong>Pipeline:</strong> <a href="https://github.com/yashwantsai06/analyst/blob/main/projects/service-ops/pipeline/build.py">build.py</a> loads the CSVs, runs the SQL and exports the cubes to JSON.</li>
       <li><strong>Dashboard:</strong> plain JavaScript and SVG, no chart library, light and dark themes, keyboard-accessible filters.</li>
     </ul>
   </article>

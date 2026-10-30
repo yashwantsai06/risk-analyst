@@ -1,6 +1,6 @@
 # Service Operations MI: NYC 311 case study
 
-Live dashboard: https://yashwantsai06.github.io/risk-analyst/projects/service-ops/
+Live dashboard: https://yashwantsai06.github.io/analyst/projects/service-ops/
 
 An operational reporting dashboard built on 1,964,678 real service requests
 (NYC Open Data, 311 Service Requests, April to September 2026).
