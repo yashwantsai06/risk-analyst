@@ -408,6 +408,9 @@ body { background: #eef2f7; color: #16233a; }
 .dots button { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: rgba(255,255,255,.45); cursor: pointer; }
 .dots button[aria-selected="true"] { background: #fff; width: 22px; border-radius: 999px; }
 @media (prefers-reduced-motion: reduce) { .rot .banner, .rot .banner.on { transition: none; transform: none; } }
+
+.rot .banner { transform: none; transition: opacity .25s ease, visibility 0s .25s; }
+.rot .banner.on { transform: none; transition: opacity .6s ease .2s; }
 </style>
 </head>
 <body>
