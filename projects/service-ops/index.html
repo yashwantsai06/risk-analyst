@@ -301,9 +301,9 @@ footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--lin
     <h2>How it's built</h2>
     <ul>
       <li><strong>Extract:</strong> six monthly CSV pulls from the NYC Open Data API (dataset <code>erm2-nwe9</code>).</li>
-      <li><strong>Model:</strong> <a href="https://github.com/yashwantsai06/analyst/blob/main/projects/service-ops/sql/02_model.sql">02_model.sql</a> builds the dimensions and fact table and flags data-quality issues.</li>
-      <li><strong>KPIs:</strong> <a href="https://github.com/yashwantsai06/analyst/blob/main/projects/service-ops/sql/03_kpi_views.sql">03_kpi_views.sql</a> defines resolution bands, the reporting cubes and exact medians.</li>
-      <li><strong>Pipeline:</strong> <a href="https://github.com/yashwantsai06/analyst/blob/main/projects/service-ops/pipeline/build.py">build.py</a> loads the CSVs, runs the SQL and exports the cubes to JSON.</li>
+      <li><strong>Model:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/sql/02_model.sql">02_model.sql</a> builds the dimensions and fact table and flags data-quality issues.</li>
+      <li><strong>KPIs:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/sql/03_kpi_views.sql">03_kpi_views.sql</a> defines resolution bands, the reporting cubes and exact medians.</li>
+      <li><strong>Pipeline:</strong> <a href="https://github.com/yashwantsai06/risk-analyst/blob/main/projects/service-ops/pipeline/build.py">build.py</a> loads the CSVs, runs the SQL and exports the cubes to JSON.</li>
       <li><strong>Dashboard:</strong> plain JavaScript and SVG, no chart library, light and dark themes, keyboard-accessible filters.</li>
     </ul>
   </article>
